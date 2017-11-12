@@ -196,7 +196,7 @@ if __name__ == '__main__':
     Code below is an example of how to make a dataset for use in a feedforward
     neural network
     """
-    DATABASE_NAME = 'ELEXON_DATA.sqlite'
+    DATABASE_NAME = 'elexon_data/ELEXON_DATA.sqlite'
     TARGET = 'imbalancePriceAmountGBP'
     data_dicts = [{'report':'B1770', 'cols':['imbalancePriceAmountGBP']},
                   {'report':'B1780', 'cols':['imbalanceQuantityMAW']}]
