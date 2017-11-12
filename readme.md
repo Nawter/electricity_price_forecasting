@@ -1,8 +1,6 @@
 # UK Imbalance Price Forecasting
-**This repo is a collection of scripts used to forecast the UK Imbalance Price**
+Purpose of this repo is educational -
 
-I'll be adding to this over time - I have three more models which I'm very excited to add to this when I get the chance!
+Hence the code is focused on simple & understandable Python (using only functions, not classes).
 
-To get started clone this repo and play around with the scripts.
-
-This project is built and maintained by Adam Green -  adam.green@adgefficiency.com
+This project is built and maintained by Adam Green -  adam.green@adgefficiency.com.
