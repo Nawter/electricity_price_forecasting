@@ -192,6 +192,10 @@ def make_datetime_features(df):
 
 
 if __name__ == '__main__':
+    """
+    Code below is an example of how to make a dataset for use in a feedforward
+    neural network
+    """
     DATABASE_NAME = 'ELEXON_DATA.sqlite'
     TARGET = 'imbalancePriceAmountGBP'
     data_dicts = [{'report':'B1770', 'cols':['imbalancePriceAmountGBP']},
@@ -278,7 +282,7 @@ if __name__ == '__main__':
     x_train, _ = make_datetime_features(x_train)
     x_test, _ = make_datetime_features(x_test)
 
-    #  should put some more tests in here
+    #  should put some more tests in here !!! TODO
     assert x_train.shape[1] == x_test.shape[1]
 
     """
@@ -294,6 +298,6 @@ if __name__ == '__main__':
               'y_test' : y_test}
 
     for name, data in output.items():
-        path = os.path.join('ml_data', name+'.csv')
+        path = os.path.join('ff_data', name+'.csv')
         print('saving {}'.format(name))
         data.to_csv(path)
