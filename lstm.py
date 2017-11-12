@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from keras_models import make_lstm
+
 
 def generate_feature_sequences(raw_data, timestep, reverse=True):
     """
@@ -17,7 +19,7 @@ def generate_feature_sequences(raw_data, timestep, reverse=True):
     feature_dim = raw_data.shape[1]
 
     #  lag the features backwards
-    sequences = [raw_data.shift(-step) for step in range(timestep)]
+    sequences = [raw_data.shift(step) for step in range(timestep)]
 
     #  optionally reverse the order of the features
     #  this can improve performance
@@ -25,24 +27,17 @@ def generate_feature_sequences(raw_data, timestep, reverse=True):
     if reverse:
         sequences = sequences[::-1]
     #  join sequences together
-    sequences = pd.concat(sequences, axis=1).dropna()
+    sequences = pd.concat(sequences, axis=1)
     #  save the index
     index = sequences.index
     #  turn into a np array
-    sequences = np.array(sequences).reshape(-1,
+    sequences = np.array(sequences[timestep:-timestep]).reshape(-1,
                                             timestep,
                                             feature_dim)
 
-    #  we remove the last few features
-    #  this is because we don't have targets for these
-    #  the -1 is there because there is already a 1 step lag
-    #  between features & target
-    sequences = sequences[:-timestep+1]
-    index = index[:-timestep+1]
-
     return sequences, index
 
-def generate_target_sequences(raw_data, timestep):
+def generate_target_sequences(raw_data, timestep, reverse=True):
     """
     args
         raw_data : pd.Series
@@ -56,23 +51,64 @@ def generate_target_sequences(raw_data, timestep):
     #  check that we have been fed a pd.Series
     assert len(raw_data.shape) == 1
     #  shift all the data using pandas
-    sequences = [raw_data.shift(step) for step in range(timestep)]
-    #  reverse the sequences to get correct order
-    sequences = sequences[::-1]
+    sequences = [raw_data.shift(-step) for step in range(timestep)]
+    if reverse:
+        #  reverse the sequences to get correct order
+        sequences = sequences[::-1]
     #  join it all together
-    sequences = pd.concat(sequences, axis=1).dropna()
+    sequences = pd.concat(sequences, axis=1)
     #  save the index
     index = sequences.index
     #  make a numpy array
-    sequences = np.array(sequences).reshape(-1, timestep, 1)
-
-    #  we remove the last few features
-    #  this is because we don't have targets for these
-    #  the -1 is there because there is already a 1 step lag
-    #  between features & target
-    sequences = sequences[timestep-1:]
-    index = index[timestep-1:]
+    sequences = np.array(sequences[timestep:-timestep]).reshape(-1, timestep, 1)
     return sequences, index
 
+def test_sequence_gen(timestep, target, features):
+    """
+    Tests the two sequence generation function
+    Uses hardcoded TIMESTEP, features & targets
+    """
+    target, t_index = generate_target_sequences(target, TIMESTEP)
+    features, f_index = generate_feature_sequences(features, TIMESTEP, reverse=False)
+
+    for f, t in zip(features, target):
+        print('target {}'.format(t.flatten()))
+        print('features {}'.format(f.flatten()))
+        print('diff in target & feature {}'.format((t-f).flatten()))
+
+    assert np.all(np.isnan(features)) == False
+
 if __name__ == '__main__':
-    test_seq = np.arange(100)
+    TIMESTEP = 4
+
+    features = pd.DataFrame(np.arange(0, 50))
+    target = pd.Series(np.arange(10, 60))
+    print('features shape is {}'.format(features.shape))
+    print('target shape is {}'.format(target.shape))
+    assert features.shape[0] == target.shape[0]
+
+    #  do some super rough scaling
+    features = (features - features.mean()) / features.std()
+    target = (target - target.mean()) / target.std()
+
+    features, f_index = generate_feature_sequences(features, TIMESTEP)
+    target, t_index = generate_target_sequences(target, TIMESTEP)
+
+    print('features shape is {}'.format(features.shape))
+    print('target shape is {}'.format(target.shape))
+
+    model = make_lstm(timestep=TIMESTEP,
+                      input_length=features.shape[2],
+                      layer_nodes=[10, 10, 10],
+                      dropout=0.0)
+
+    model.fit(x=features, y=target, epochs=100, batch_size=1)
+
+    prediction =model.predict(x=features)
+
+    for f, t, p in zip(features, target, prediction):
+        print('features {}'.format(f.flatten()))
+        print('target {}'.format(t.flatten()))
+        print('prediction {}'.format(p.flatten()))
+        print('diff in target & feature {}'.format((t-f).flatten()))
+        print('diff in target & prediction {}'.format((t-p).flatten()))

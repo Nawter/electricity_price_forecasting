@@ -16,17 +16,14 @@ in modern neural networks.  I have left the learning rate & other optimizer
 hyperparameters at their default values.
 
 """
-import keras
+#  import stuff we need to make feedforward & LSTM mdoels
+from keras.layers import Activation, Dense, Dropout, LSTM
+from keras.layers.normalization import BatchNormalization
+from keras.layers.wrappers import TimeDistributed
+from keras.models import Sequential
 
-import tensorflow as tf
-import keras
+#  import the tensorflow backend so we can prefer GPU training
 import keras.backend.tensorflow_backend as KTF
-
-# sess = KTF.get_session()
-# with KTF.tf.device('gpu:0'):  # force tensorflow to train on GPU
-#     KTF.set_session(
-#         KTF.tf.Session(config=KTF.tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)))
-
 
 def make_ff(input_length,
             layer_nodes,

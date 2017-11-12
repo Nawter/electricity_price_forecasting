@@ -10,4 +10,7 @@ Project is split into:
 
 Real data is included but it's unlikely you can train a very powerful model using only two features.  This is meant as a demonstration of how to implement timeseries forecasting in Python.
 
+Main dependencies for this project are keras (2.0.8) & tensorflow () or tensorflow-gpu ().
+Either CPU or GPU should run fine.
+
 This project is built and maintained by Adam Green -  adam.green@adgefficiency.com.
