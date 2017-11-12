@@ -8,6 +8,6 @@ Project is split into:
 -  feedforward.py - creates a Keras model using the saved ff_data dataset
 -  lstm.py - creates a dataset & then a Keras model
 
-Real data is included but it's unlikely you can train a very powerful model using only two features.  This is meant as a demonstration of how to impelement timeseries forecasting in Python.
+Real data is included but it's unlikely you can train a very powerful model using only two features.  This is meant as a demonstration of how to implement timeseries forecasting in Python.
 
 This project is built and maintained by Adam Green -  adam.green@adgefficiency.com.
