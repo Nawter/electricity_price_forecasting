@@ -1,52 +1,131 @@
+"""
 
+"""
+import argparse
+from collections import defaultdict, namedtuple
+from datetime import datetime as dt
+from datetime import timedelta
+import requests
+import xml.etree.ElementTree as ET
 
 from bs4 import BeautifulSoup
-import lxml
+import pandas as pd
 
-"""
-Purpose of this script is to scrape data from the ELEXON APIKey
 
-Requires using your own API key which can you can get from here ***
-"""
-SettlementDate = '12'
+def get_dates(start_date, days):
+    start_date = dt.strptime(start_date, '%Y-%m-%d')
+    dates = []
+    for day in range(days):
+        dates.append(start_date + timedelta(days=day))
+    return dates
 
-# dictionary of reports that we want
-imbaprice = {'Report':'B1770',
-             'SettlementDate':SettlementDate,
-             'Period':'*',
-             'Col_name':'imbalancePriceAmountGBP'}
 
-imbavol = {'Report':'B1780',
-           'SettlementDate':SettlementDate,
-           'Period':'*',
-           'Col_name':'imbalanceQuantityMAW'}
+class ReportGrabber(object):
 
-def BMRS_GetXML(**kwargs):
-    """
-    args
-        dictionary containing arguments to include in url (report specific)
+    def __init__(self, name, data_cols, key):
+        self.name = name
 
-    returns
-        xml (object) : the parsed Elexon report
-    """
-    #  create the base URL
-    url = 'https://api.bmreports.com/BMRS/{Report}/v1?APIKey=***YOUR API KEY HERE***&ServiceType=xml'.format(**kwargs)
-    #  iterate over the report dictionary
-    for key, value in kwargs.items():
-        #  ignore report name as it is already in the url
-        #  also ignore the column name
-        if key == 'Report' or key == 'Col_name':
-            pass
-        else:
-        #  add the report info onto the url
-            url += "&%s=%s" % (key, value)
+        self.data_cols = data_cols
 
-    #  parse the url using lxml
-    print('parsing {}'.format(url))
-    xml = 1
-    lxml.objectify.parse(urllib.request.urlopen(url,timeout=500))
-    return url, xml
+        self.columns = ['settlementDate', 'settlementPeriod']
+        self.columns.extend(data_cols)
 
-url, xml = BMRS_GetXML(**imbavol)
-import requests
-r = requests.get(url)
+        self.key = key
+
+    def scrape_report(self, settlement_date):
+
+        url = self.get_url(settlement_date)
+        print('scraping {} {}'.format(self.name, settlement_date))
+
+        #  use the requests library to get the response from this url
+        r = requests.get(url)
+        self.root = ET.fromstring(r.content)
+
+        #  iterate over the XML
+        #  save each of the columns into a dict
+        output = defaultdict(list)
+
+        #  we can narrow down where we need to look in this XML
+        for parent in self.root.findall("./responseBody/responseList/item"):
+
+            for child in parent:
+
+                #  condition that only gets the data we want
+                #  if we wanted all raw data we wouldn't do this
+                if child.tag in self.columns:
+                    output[child.tag].append(child.text)
+
+        return output
+
+    def create_dataframe(self, output_dict):
+        #  create a dataframe
+        output = pd.DataFrame().from_dict(output_dict)
+
+        #  create the time stamp by iterating over each row
+        #  there must be a better way!
+        for row_idx in range(output.shape[0]):
+
+            date = dt.strptime(output.loc[row_idx, 'settlementDate'], '%Y-%m-%d')
+            stamp = date + timedelta(minutes=30*int(output.loc[row_idx, 'settlementPeriod']))
+            output.loc[row_idx, 'time_stamp'] = stamp
+
+        output.loc[:, 'time_stamp'] = pd.to_datetime(output.loc[:, 'time_stamp'])
+
+        output.index = output.loc[:, 'time_stamp']
+        output.drop('time_stamp', inplace=True, axis=1)
+
+        #  iterating through the XML creates duplicates - not sure why
+        #  here we drop duplicates and sort the index
+        output.drop_duplicates(inplace=True)
+        output.sort_index(inplace=True)
+
+        #  finally we set the dype of the columns correctly
+        for col in self.data_cols:
+            output.loc[:, col] = pd.to_numeric(output.loc[:, col])
+        output = output.loc[:, self.data_cols]
+        return output
+
+    def get_url(self, settlement_date):
+        url = 'https://api.bmreports.com/BMRS/{}/'.format(self.name)
+        url += 'v1?APIKey={}&'.format(self.key)
+        url += 'ServiceType=xml&'
+        url += 'Period=*&SettlementDate={}'.format(settlement_date)
+        return url
+
+
+if __name__ == '__main__':
+    #  send in the ELEXON API key from the command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--key')
+    args = parser.parse_args()
+    key = args.key
+
+    #  the reports we want data for
+    #  format of {name: columns}
+    reports = {'B1770': ['imbalancePriceAmountGBP'],
+               'B1780': ['imbalanceQuantityMAW']}
+
+    #  the dates we want data for
+    settlementdates = get_dates('2017-01-01', 3)
+
+    #  report data is a global list our data
+    report_data = []
+    for name, cols in reports.items():
+        report = ReportGrabber(name, cols, key)
+
+        #  dataframes is a list of reports for each date
+        dataframes = []
+        for date in settlementdates:
+            output_dict = report.scrape_report(date)
+            dataframes.append(report.create_dataframe(output_dict))
+
+        all_dates = pd.concat(dataframes, axis=0)
+        report_data.append(all_dates)
+
+    report_data = pd.concat(report_data, axis=1)
+    print('report data starts at {}'.format(report_data.index[0]))
+    print('report data ends at {}'.format(report_data.index[-1]))
+    print(report_data.head())
+    print(report_data.describe())
+
+    report_data.to_csv('report_data.csv')

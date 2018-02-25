@@ -1,4 +1,6 @@
 # UK Imbalance Price Forecasting
+This code is currently being reworked!
+
 Purpose of this repo is educational - the code is focused on simple & understandable Python (using only functions, not classes).
 
 Project is split into:
