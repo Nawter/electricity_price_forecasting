@@ -25,6 +25,7 @@ class ReportGrabber(object):
     def __init__(self, name, data_cols, key):
         self.name = name
 
+        assert isinstance(data_cols, list)
         self.data_cols = data_cols
 
         self.columns = ['settlementDate', 'settlementPeriod']
