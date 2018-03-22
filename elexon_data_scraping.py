@@ -13,6 +13,16 @@ import pandas as pd
 
 
 def get_dates(start_date, days):
+    """
+    Creates a list of dates
+
+    args
+        start_date (str)
+        days (int) number of days after start date
+
+    returns
+        dates (list) list of strings
+    """
     start_date = dt.strptime(start_date, '%Y-%m-%d')
     dates = []
     for day in range(days):
@@ -21,7 +31,14 @@ def get_dates(start_date, days):
 
 
 class ReportGrabber(object):
+    """
+    Grabs data from Elexon
 
+    args
+        name (str) name of the Elexon report
+        data_cols (list) list of columns to get for the report
+        key (str) API key
+    """
     def __init__(self, name, data_cols, key):
         self.name = name
 
@@ -34,13 +51,25 @@ class ReportGrabber(object):
         self.key = key
 
     def scrape_report(self, settlement_date):
+        """
+        Gets data for one settlement date
 
+        args
+            settlement_date (str)
+
+        returns
+            output (dict) {column name : data}
+        """
         url = self.get_url(settlement_date)
         print('scraping {} {}'.format(self.name, settlement_date))
 
         #  use the requests library to get the response from this url
-        r = requests.get(url)
-        self.root = ET.fromstring(r.content)
+        req = requests.get(url)
+
+        if 'An invalid API key has been passed' in req.text:
+            raise ValueError('Invalid API key')
+
+        self.root = ET.fromstring(req.content)
 
         #  iterate over the XML
         #  save each of the columns into a dict
@@ -59,6 +88,17 @@ class ReportGrabber(object):
         return output
 
     def create_dataframe(self, output_dict):
+        """
+        Creates a dataframe from the output dictionary
+        Will create a dataframe for one settlement_date, as the output_dict
+        will be data for one settlement_date
+
+        args
+            output_dict (dict) {column name : data}
+
+        returns
+            output (DataFrame)
+        """
         #  create a dataframe
         output = pd.DataFrame().from_dict(output_dict)
 
@@ -87,6 +127,15 @@ class ReportGrabber(object):
         return output
 
     def get_url(self, settlement_date):
+        """
+        Forms the URL to query the Elexon API
+
+        args
+            settlement_date (str)
+
+        returns
+            url (str)
+        """
         url = 'https://api.bmreports.com/BMRS/{}/'.format(self.name)
         url += 'v1?APIKey={}&'.format(self.key)
         url += 'ServiceType=xml&'
@@ -107,7 +156,7 @@ if __name__ == '__main__':
                'B1780': ['imbalanceQuantityMAW']}
 
     #  the dates we want data for
-    settlementdates = get_dates('2017-01-01', 3)
+    settlementdates = get_dates('2016-01-01', 4) 
 
     #  report data is a global list our data
     report_data = []
@@ -129,4 +178,4 @@ if __name__ == '__main__':
     print(report_data.head())
     print(report_data.describe())
 
-    report_data.to_csv('report_data.csv')
+    report_data.to_csv('elexon_data/elexon_report_data.csv')
