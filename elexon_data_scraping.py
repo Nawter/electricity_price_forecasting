@@ -156,7 +156,7 @@ if __name__ == '__main__':
                'B1780': ['imbalanceQuantityMAW']}
 
     #  the dates we want data for
-    settlementdates = get_dates('2016-01-01', 4) 
+    settlementdates = get_dates('2015-01-01', 3*365)
 
     #  report data is a global list our data
     report_data = []
