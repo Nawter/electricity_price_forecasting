@@ -2,13 +2,13 @@
 
 """
 import argparse
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from datetime import datetime as dt
 from datetime import timedelta
+import pytz
 import requests
 import xml.etree.ElementTree as ET
 
-from bs4 import BeautifulSoup
 import pandas as pd
 
 
@@ -36,8 +36,15 @@ class ReportGrabber(object):
         data_cols (list) list of columns to get for the report
         key (str) API key
     """
-    def __init__(self, name, data_cols, key):
+    local_tz = pytz.timezone('Europe/London')
+    index_tz = pytz.timezone('GMT')
+    fmt = '%Y-%m-%d %H:%M:%S'
+
+    def __init__(self, name, data_cols, key, price_category='Excess balance'):
         self.name = name
+
+        #  relevant only to the imbalance price
+        self.price_category = price_category
 
         assert isinstance(data_cols, list)
         self.data_cols = data_cols
@@ -105,19 +112,11 @@ class ReportGrabber(object):
 
             date = dt.strptime(output.loc[row_idx, 'settlementDate'], '%Y-%m-%d')
             stamp = date + timedelta(minutes=30*int(output.loc[row_idx, 'settlementPeriod']))
-            output.loc[row_idx, 'time_stamp'] = stamp
+            aware = self.local_tz.localize(stamp)
+            index = aware.astimezone(self.index_tz)
 
-        output.loc[:, 'time_stamp'] = pd.to_datetime(output.loc[:, 'time_stamp'])
+            output.loc[row_idx, 'time_stamp'] = index.strftime(self.fmt)
 
-        #  iterating through the XML creates duplicates - not sure why
-        #  here we drop duplicates and sort the index
-        output.drop_duplicates(inplace=True)
-        output.sort_index(inplace=True)
-
-        #  finally we set the dype of the columns correctly
-        for col in self.data_cols:
-            output.loc[:, col] = pd.to_numeric(output.loc[:, col])
-        output = output.loc[:, self.data_cols]
         return output
 
     def get_url(self, settlement_date):
@@ -137,6 +136,17 @@ class ReportGrabber(object):
         return url
 
 
+def scrape_all_dates(name, cols, key, dates):
+    report = ReportGrabber(name, cols, key)
+
+    #  dataframes is a list of reports for each date
+    dataframes = []
+    for date in dates:
+        output_dict = report.scrape_report(date)
+        dataframes.append(report.create_dataframe(output_dict))
+
+    return pd.concat(dataframes, axis=0)
+
 if __name__ == '__main__':
     #  send in the ELEXON API key from the command line
     parser = argparse.ArgumentParser()
@@ -146,34 +156,12 @@ if __name__ == '__main__':
 
     #  the reports we want data for
     #  format of {name: columns}
-    reports = {'B1770': ['imbalancePriceAmountGBP'],
+    reports = {'B1770': ['imbalancePriceAmountGBP', 'priceCategory'],
                'B1780': ['imbalanceQuantityMAW']}
 
     #  the dates we want data for
     settlementdates = get_dates('2015-01-01', 2*365)
 
-    #  report data is a global list our data
-    report_data = []
     for name, cols in reports.items():
-        report = ReportGrabber(name, cols, key)
-
-        #  dataframes is a list of reports for each date
-        dataframes = []
-        for date in settlementdates:
-            output_dict = report.scrape_report(date)
-            dataframes.append(report.create_dataframe(output_dict))
-
-        all_dates = pd.concat(dataframes, axis=0)
-        report_data.append(all_dates)
-
-    report_data = pd.concat(report_data, axis=1)
-    report_data.drop_duplicates(inplace=True, subset='time_stamp')
-    report_data.index = pd.to_datetime(report_data.loc[:, 'time_stamp'])
-    report_data.drop('time_stamp', inplace=True)
-
-    print('report data starts at {}'.format(report_data.index[0]))
-    print('report data ends at {}'.format(report_data.index[-1]))
-    print(report_data.head())
-    print(report_data.describe())
-
-    report_data.to_csv('elexon_data/elexon_report_data.csv')
+        data = scrape_all_dates(name, cols, key, settlementdates)
+        data.to_csv('data/{}.csv'.format(name))

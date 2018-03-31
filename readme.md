@@ -1,18 +1,27 @@
 # UK Imbalance Price Forecasting
+
 This code is currently being reworked!
 
-Purpose of this repo is educational - the code is focused on simple & understandable Python (using only functions, not classes).
+**elexton_data_scraping.py** 
 
-Project is split into:
--  elexton_data_scraping.py - pulls data from the Elexon API and saves in a sqlite database.
--  make_dataset.py - pulls data from the sqlite databse and creates a machine learning dataset
--  keras_models.py - contains functions to create feedforward & LSTM Keras models
--  feedforward.py - creates a Keras model using the saved ff_data dataset
--  lstm.py - creates a dataset & then a Keras model
+This script pulls data from ELEXON using their API.  It requires getting an API key which [you can get here](https://www.elexon.co.uk/guidance-note/bmrs-api-data-push-user-guide/).
 
-Real data is included but it's unlikely you can train a very powerful model using only two features.  This is meant as a demonstration of how to implement timeseries forecasting in Python.
+Your API key is passed into the script from the command line
 
-Main dependencies for this project are keras (2.0.8) & tensorflow () or tensorflow-gpu ().
-Either CPU or GPU should run fine.
+``` bash
+$ python elexon_data_scraping.py --key YOURKEYHERE
+```
 
-This project is built and maintained by Adam Green -  adam.green@adgefficiency.com.
+The basic flow of the script is
+- form a URL to query the ELEXON API for a single SettlementDate
+- the requests library is used to parse the response from the API, searching for the columns specified 
+- a pandas DataFrame is created from the parsed XML, with the timestamp converted from London time to GMT.  This is to avoid the complication of daylight savings time
+
+The script is setup to iterate over multiple days and to save all data to a csv.  Saving a copy of the raw data is good
+practice - cleaning and processing of the ELEXON data is done in make_dataset.py
+
+**make_dataset.py**
+
+This script takes the raw data and processes it in a form for use in training machine learning models.
+
+The script makes use of Pipelines from the sklearn library
