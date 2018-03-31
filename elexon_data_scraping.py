@@ -112,9 +112,6 @@ class ReportGrabber(object):
 
         output.loc[:, 'time_stamp'] = pd.to_datetime(output.loc[:, 'time_stamp'])
 
-        output.index = output.loc[:, 'time_stamp']
-        output.drop('time_stamp', inplace=True, axis=1)
-
         #  iterating through the XML creates duplicates - not sure why
         #  here we drop duplicates and sort the index
         output.drop_duplicates(inplace=True)
@@ -156,7 +153,7 @@ if __name__ == '__main__':
                'B1780': ['imbalanceQuantityMAW']}
 
     #  the dates we want data for
-    settlementdates = get_dates('2015-01-01', 3*365)
+    settlementdates = get_dates('2015-01-01', 2*365)
 
     #  report data is a global list our data
     report_data = []
@@ -173,6 +170,10 @@ if __name__ == '__main__':
         report_data.append(all_dates)
 
     report_data = pd.concat(report_data, axis=1)
+    report_data.drop_duplicates(inplace=True, subset='time_stamp')
+    report_data.index = pd.to_datetime(report_data.loc[:, 'time_stamp'])
+    report_data.drop('time_stamp', inplace=True)
+
     print('report data starts at {}'.format(report_data.index[0]))
     print('report data ends at {}'.format(report_data.index[-1]))
     print(report_data.head())

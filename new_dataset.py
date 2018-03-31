@@ -14,6 +14,7 @@ raw_data = pd.read_csv('./elexon_data/elexon_report_data.csv',
 f = 'imbalanceQuantityMAW'
 
 train, test = train_test_split(raw_data, test_size=0.3)
+train_index, test_index = train.index, test.index
 
 make_target = make_pipeline(ColumnSelector('imbalancePriceAmountGBP'),
                             AsMatrix(),

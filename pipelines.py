@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
+
 class AsMatrix(BaseEstimator, TransformerMixin):
 
     def __init__(self):
@@ -48,18 +49,12 @@ class OffsetGenerator(BaseEstimator, TransformerMixin):
         .shift(negative) -> horizion
         """
         if self.mode == 'lag':
+            shifted = [x.shift(abs(o), axis=0) for o in self.offsets]
+            return pd.concat(shifted, axis=1)
+
+        elif self.mode == 'horizion':
             shifted = [x.shift(-abs(o), axis=0) for o in self.offsets]
             return pd.concat(shifted, axis=1)
 
-if __name__ == '__main__':
-    arr = np.arange(6)
-    df = pd.DataFrame(arr.reshape(-1, 2))
-
-    shifter = OffsetGenerator(mode='lag', offsets=[1, 2])
-
-    shifted = shifter.transform(df)
-
-    print(shifted)
-
-
-
+        else:
+            raise ValueError('Mode of {} is not correct'.format(self.mode))
