@@ -1,6 +1,20 @@
 import numpy as np
 import pandas as pd
+
 from sklearn.base import BaseEstimator, TransformerMixin
+
+
+class AlignPandas(BaseEstimator, TransformerMixin):
+
+    def __init__(self, max_lag, max_horizion):
+        self.max_lag = max_lag
+        self.max_horizion = max_horizion
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, x):
+        return x.iloc[self.max_lag:-self.max_horizion, :]
 
 
 class AsMatrix(BaseEstimator, TransformerMixin):
@@ -26,6 +40,18 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
 
     def transform(self, x):
         return x.loc[:, self.columns]
+
+
+class DropNans(BaseEstimator, TransformerMixin):
+
+    def __init__(self):
+        pass
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, x):
+        return x.dropna(axis=0)
 
 
 class OffsetGenerator(BaseEstimator, TransformerMixin):
