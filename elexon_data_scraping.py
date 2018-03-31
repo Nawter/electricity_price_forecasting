@@ -24,10 +24,7 @@ def get_dates(start_date, days):
         dates (list) list of strings
     """
     start_date = dt.strptime(start_date, '%Y-%m-%d')
-    dates = []
-    for day in range(days):
-        dates.append(start_date + timedelta(days=day))
-    return dates
+    return [start_date + timedelta(days=d) for d in range(days)]
 
 
 class ReportGrabber(object):
