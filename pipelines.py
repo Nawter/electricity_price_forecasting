@@ -6,9 +6,9 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 class AlignPandas(BaseEstimator, TransformerMixin):
 
-    def __init__(self, max_lag, max_horizion):
-        self.max_lag = max_lag
-        self.max_horizion = max_horizion
+    def __init__(self, LAGS, HORIZIONS):
+        self.max_lag = max(LAGS)
+        self.max_horizion = max(HORIZIONS)
 
     def fit(self, x, y=None):
         return self

@@ -1,8 +1,9 @@
 """
 Cleans raw ELEXON data
 """
-import pandas as pd
+import pickle
 
+import pandas as pd
 
 price = pd.read_csv('data/B1770.csv', parse_dates=True)
 
@@ -66,4 +67,4 @@ def check_output(df):
 
 check_output(out)
 
-
+out.to_csv('data/clean.csv')
