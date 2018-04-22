@@ -29,8 +29,14 @@ Bespoke data cleaning for the Elexon data
 - removing duplicates
 - filling nans
 
-**make_dataset.py**
+**train_model.py**
+```bash
+$ python train_model.py
+```
+This script takes the clean data and processes it for use in training models.  
 
-This script takes the raw data and processes it in a form for use in training machine learning models.
+After processing the data is used to train sklearn models.
 
-The script makes use of Pipelines from the sklearn library
+The script makes use of some custom build pipelines which are in **pipelines.py**.  The script uses a simple library for
+models in **models.py**
+
