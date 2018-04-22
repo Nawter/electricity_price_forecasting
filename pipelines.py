@@ -1,4 +1,6 @@
-import numpy as np
+"""
+A collection of generic sklearn pipelines
+"""
 import pandas as pd
 
 from sklearn.base import BaseEstimator, TransformerMixin
