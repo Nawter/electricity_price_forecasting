@@ -1,5 +1,4 @@
-# PROJECT SPECIFIC
-*.csv
-
-# Byte-compiled / optimized / DLL files
 __pycache__/
+.DS_store
+.cache
+.swp
