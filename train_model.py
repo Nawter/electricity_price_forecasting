@@ -1,19 +1,21 @@
+import numpy as np
 import pandas as pd
 
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
+from models import get_model
 import pipelines as p
 
 raw_data = pd.read_csv('./data/clean.csv',
                        index_col=0,
                        parse_dates=True)
 
-train, test = train_test_split(raw_data, test_size=0.3)
+train, test = train_test_split(raw_data, test_size=0.3, shuffle=False)
 train_index, test_index = train.index, test.index
 
-HORIZIONS = [0, 1, 2, 3, 4, 10]
+HORIZIONS = [0, 1]
 LAGS = [1, 2, 3, 4, 10]
 
 make_target = make_pipeline(p.ColumnSelector('ImbalancePrice_excess_balance_[£/MWh]'),
@@ -38,10 +40,25 @@ dataset = {'x_train': x_train,
            'x_test': x_test,
            'y_test': y_test}
 
-def print_dataset(dataset):
-    for k, v in dataset.items():
-        print('{}_{}'.format(k, v.shape))
 
-print_dataset(dataset)
+def print_dict(d):
+    for k, v in d.items():
+        print('{} {}'.format(k, v.shape))
+        print('means {}'.format(np.mean(v, axis=0)))
+        print('std {}'.format(np.std(v, axis=0)))
 
 
+print_dict(dataset)
+
+model = get_model('random_forest',
+                  n_estimators=100,
+                  max_features='sqrt',
+                  verbose=1)
+
+# model = get_model('linear',
+#                   normalize=False)
+
+model.fit(x_train, y_train)
+
+print('R2 on training data {}'.format(model.score(x_train, y_train)))
+print('R2 on test data {}'.format(model.score(x_test, y_test)))

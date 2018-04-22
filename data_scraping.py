@@ -160,7 +160,7 @@ if __name__ == '__main__':
                'B1780': ['imbalanceQuantityMAW']}
 
     #  the dates we want data for
-    settlementdates = get_dates('2015-01-01', 3*365)
+    settlementdates = get_dates('2010-01-01', 8*365)
 
     for name, cols in reports.items():
         data = scrape_all_dates(name, cols, key, settlementdates)
