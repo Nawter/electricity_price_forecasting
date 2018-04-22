@@ -25,9 +25,7 @@ practice - cleaning and processing of the ELEXON data is done in make_dataset.py
 ``` bash
 $ python clean_data.py 
 ```
-Bespoke data cleaning for the Elexon data
-- removing duplicates
-- filling nans
+Bespoke data cleaning for the Elexon data. Care is taken to remove duplicates and fill missing data.
 
 **train_model.py**
 ```bash
