@@ -1,5 +1,14 @@
 """
+Scrapes data from the ELEXON API
 
+Requires using an ELEXON API key - https://www.elexonportal.co.uk/
+
+functions
+    make_dates_list() creates a list of dates from a start & num_days
+    scrape_all_dates() takes a list of dates and scrapes data for each
+
+classes
+    ReportGrabber scrapes data from Elexon  
 """
 import argparse
 from collections import defaultdict
@@ -12,7 +21,7 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 
 
-def get_dates(start_date, days):
+def make_dates_list(start_date, num_days):
     """
     Creates a list of dates
 
@@ -24,7 +33,28 @@ def get_dates(start_date, days):
         dates (list) list of strings
     """
     start_date = dt.strptime(start_date, '%Y-%m-%d')
-    return [start_date + timedelta(days=d) for d in range(days)]
+    return [start_date + timedelta(days=d) for d in range(num_days)]
+
+
+def scrape_all_dates(name, cols, key, dates):
+    """
+    Takes a list of dates and scrapes Elexon for each
+
+    args
+        name (str) name of the Elexon report
+        cols (list) list of columns to get for the report
+        key (str) API key
+        dates (list)
+    """
+    report = ReportGrabber(name, cols, key)
+
+    #  dataframes is a list of reports for each date
+    dataframes = []
+    for date in dates:
+        output_dict = report.scrape_report(date)
+        dataframes.append(report.create_dataframe(output_dict))
+
+    return pd.concat(dataframes, axis=0)
 
 
 class ReportGrabber(object):
@@ -136,17 +166,6 @@ class ReportGrabber(object):
         return url
 
 
-def scrape_all_dates(name, cols, key, dates):
-    report = ReportGrabber(name, cols, key)
-
-    #  dataframes is a list of reports for each date
-    dataframes = []
-    for date in dates:
-        output_dict = report.scrape_report(date)
-        dataframes.append(report.create_dataframe(output_dict))
-
-    return pd.concat(dataframes, axis=0)
-
 if __name__ == '__main__':
     #  send in the ELEXON API key from the command line
     parser = argparse.ArgumentParser()
@@ -160,8 +179,9 @@ if __name__ == '__main__':
                'B1780': ['imbalanceQuantityMAW']}
 
     #  the dates we want data for
-    settlementdates = get_dates('2010-01-01', 8*365)
+    settlementdates = make_dates_list('2010-01-01', 8*365)
 
+    #  loop over the reports and save each as a csv
     for name, cols in reports.items():
         data = scrape_all_dates(name, cols, key, settlementdates)
         data.to_csv('data/{}.csv'.format(name))
