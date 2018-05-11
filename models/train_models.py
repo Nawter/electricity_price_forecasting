@@ -52,7 +52,7 @@ if __name__ == '__main__':
     dataset_describe(dataset)
 
     model = get_model('random_forest',
-                      n_estimators=100,
+                      n_estimators=1000,
                       max_features='sqrt',
                       verbose=1)
 

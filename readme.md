@@ -2,7 +2,7 @@
 
 This code is currently being reworked!
 
-**elexton_data_scraping.py** 
+**data/elexton_data_scraping.py** 
 
 This script pulls data from ELEXON using their API.  It requires getting an API key which [you can get here](https://www.elexon.co.uk/guidance-note/bmrs-api-data-push-user-guide/).
 
@@ -20,14 +20,14 @@ The basic flow of the script is
 The script is setup to iterate over multiple days and to save all data to a csv.  Saving a copy of the raw data is good
 practice - cleaning and processing of the ELEXON data is done in make_dataset.py
 
-**clean_data.py**
+**data/clean_data.py**
 
 ``` bash
 $ python clean_data.py 
 ```
 Bespoke data cleaning for the Elexon data. Care is taken to remove duplicates and fill missing data.
 
-**train_model.py**
+**models/train_model.py**
 ```bash
 $ python train_model.py
 ```
@@ -35,6 +35,5 @@ This script takes the clean data and processes it for use in training models.
 
 After processing the data is used to train sklearn models.
 
-The script makes use of some custom build pipelines which are in **pipelines.py**.  The script uses a simple library for
-models in **models.py**
+The script makes use of some custom build pipelines which are in **pipelines.py**.  The script uses a simple library for models in **models.py**
 
