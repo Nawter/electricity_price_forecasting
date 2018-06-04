@@ -90,4 +90,4 @@ if __name__ == '__main__':
     out = fill_nans(out)
     check_output(out)
 
-    out.to_csv('data/clean.csv')
+    out.to_csv('elexon/clean.csv')

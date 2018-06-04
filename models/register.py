@@ -7,5 +7,6 @@ models = {'random_forest': RandomForestRegressor,
 
 
 def get_model(model_id, **kwargs):
+    print('making {}'.format(model_id))
     model = models[model_id]
     return model(**kwargs)

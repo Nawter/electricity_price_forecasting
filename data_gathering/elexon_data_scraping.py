@@ -184,4 +184,4 @@ if __name__ == '__main__':
     #  loop over the reports and save each as a csv
     for name, cols in reports.items():
         data = scrape_all_dates(name, cols, key, settlementdates)
-        data.to_csv('data/{}.csv'.format(name))
+        data.to_csv('elexon/{}.csv'.format(name))

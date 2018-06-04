@@ -20,7 +20,7 @@ The basic flow of the script is
 The script is setup to iterate over multiple days and to save all data to a csv.  Saving a copy of the raw data is good
 practice - cleaning and processing of the ELEXON data is done in make_dataset.py
 
-**data/clean_data.py**
+**data/elexon_clean_data.py**
 
 ``` bash
 $ python clean_data.py 
