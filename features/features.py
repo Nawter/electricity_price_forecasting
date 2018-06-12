@@ -26,6 +26,7 @@ if __name__ == '__main__':
     HORIZIONS = [0, 1]
     LAGS = [1, 2, 3, 4, 10]
 
+    #  TODO HH cyclical features
     make_target = make_pipeline(p.ColumnSelector('ImbalancePrice_excess_balance_[£/MWh]'),
                                 p.OffsetGenerator('horizion', HORIZIONS),
                                 p.AlignPandas(LAGS, HORIZIONS),

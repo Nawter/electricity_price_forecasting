@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from models.pipelines import OffsetGenerator
+from utils.pipelines import OffsetGenerator
 
 data = np.arange(10).reshape(-1, 2)
 DATA = pd.DataFrame(data)
