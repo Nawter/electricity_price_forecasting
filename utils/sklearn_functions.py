@@ -5,14 +5,16 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.model_selection import TimeSeriesSplit 
 
 
-def cross_validation(model,
-		     params,
-		     make_feature_pipeline,
-		     make_target_pipeline,
-		     pipeline_params,
-		     train_data,
-		     n_folds=5,
-		     verbose=False):
+def cross_validation(
+        model,
+        params,
+        make_feature_pipeline,
+        make_target_pipeline,
+        pipeline_params,
+        train_data,
+        n_folds=5,
+        verbose=False
+):
     """
     Cross validates over a single set of model parameters
 

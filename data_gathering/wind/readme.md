@@ -1,10 +1,12 @@
 # wind_forecasting
 
-Data Description
+This dataset comes from [Intelligent Embedded Systems - the EuropeWindFarm data set](https://www.ies.uni-kassel.de/Software).
+
+## Data Description
 
 The data set containing the day-ahead forecasts of 45 wind farms (off- and onshore) scattered over the European continent as shown in Fig. 6. The data set contains hourly averaged wind power generation time series for two consecutive years and the corresponding day-ahead meteorological forecasts using the European Centre for Medium-Range Weather Forecasts (ECMWF) weather model. 
 
-Data Items
+## Data Items
 
 * Time Stamp of the measurement
 * Forecasting Time Step - time between the creation of the forecast to the forecasted point in time
@@ -16,7 +18,7 @@ Data Items
 * Air Temperature Forecast of the measurement
 * Wind Power Generation of the wind farm
 
-Data Processing
+## Data Processing
 
 * The power generation time series are normalized with the respective nominal capacity of the wind farm in order to enable a scale-free comparison. 
 * All weather situations are normalized in the range [0..1]. 
