@@ -3,10 +3,8 @@ import pandas as pd
 
 from register import get_model
 
-
-
-
 if __name__ == '__main__':
+
 
     model_config = {'model_id': 'random_forest',
                     'n_estimators': 1000,

@@ -81,7 +81,9 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
 
 
 class RollingSum(BaseEstimator, TransformerMixin):
-
+    """
+    Setup to not include the current value in the sum
+    """
     def __init__(self, window):
         self.window = window
 
@@ -89,8 +91,6 @@ class RollingSum(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, x):
-        return x.rolling(window=self.window,
-                         min_periods=0).sum()
 
 
 class DropNans(BaseEstimator, TransformerMixin):

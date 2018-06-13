@@ -62,3 +62,6 @@ def compare_index_length(df, freq):
                              freq=freq)
     print('ideal index len {}'.format(ideal.shape[0]))
     print('actual index len {}'.format(df.shape[0]))
+    
+    print('missing are:')
+    print(set(df.index).symmetric_difference(set(ideal)))

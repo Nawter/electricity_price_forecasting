@@ -43,3 +43,15 @@ def plot_bar(df, cols=None, show=False, save_name=None):
         f.savefig(save_name)
 
     return f
+
+
+def plot_series(series, **kwargs):
+    f, a = plt.subplots(figsize=(25,5))
+    series.plot(ax=a, **kwargs)
+    return f
+
+
+def plot_scatter(df, x, y, **kwargs):
+    f, a = plt.subplots(figsize=(10, 10))
+    df.plot(x=x, y=y, kind='scatter', ax=a, **kwargs)
+    return f
