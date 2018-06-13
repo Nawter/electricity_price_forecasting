@@ -80,6 +80,19 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
         return x.loc[:, self.columns]
 
 
+class ColumnDropper(BaseEstimator, TransformerMixin):
+
+    def __init__(self, columns):
+        assert(isinstance(columns, list))
+        self.columns = columns
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, x):
+        return x.drop(self.columns, axis=1) 
+
+
 class RollingSum(BaseEstimator, TransformerMixin):
     """
     Setup to not include the current value in the sum
@@ -91,6 +104,7 @@ class RollingSum(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, x):
+        raise NotImplementedError
 
 
 class DropNans(BaseEstimator, TransformerMixin):
@@ -104,6 +118,30 @@ class DropNans(BaseEstimator, TransformerMixin):
     def transform(self, x):
         return x.dropna(axis=0)
 
+
+class HourlyCyclicalFeatures(BaseEstimator, TransformerMixin):
+    """
+    args
+    """
+    hours_in_day = 24
+
+    def __init__(self):
+        pass
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, x):
+        h = x.index.hour
+
+        sin = np.sin(2 * np.pi * h / self.hours_in_day)
+        cos = np.cos(2 * np.pi * h / self.hours_in_day)
+
+        out = pd.DataFrame(index=x.index)
+        out.loc[:, 'sin_h'] = sin
+        out.loc[:, 'cos_h'] = cos
+
+        return out
 
 class HalfHourlyCyclicalFeatures(BaseEstimator, TransformerMixin):
     """
@@ -128,6 +166,27 @@ class HalfHourlyCyclicalFeatures(BaseEstimator, TransformerMixin):
         out.loc[:, 'cos_hh'] = cos
 
         return out
+
+
+class CyclicalFeatures(BaseEstimator, TransformerMixin):
+
+    def __init__(self, max_value):
+        self.max_value = max_value
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, x):
+
+        sin = np.sin(2 * np.pi * x / self.max_value)
+        cos = np.cos(2 * np.pi * x / self.max_value)
+
+        out = pd.DataFrame(index=x.index)
+        out.loc[:, 'sin_hh'] = sin
+        out.loc[:, 'cos_hh'] = cos
+
+        return out
+
 
 
 class OffsetGenerator(BaseEstimator, TransformerMixin):

@@ -15,53 +15,67 @@ def make_dt_index(df, timestamp_col, dt_offset=None):
     df.drop(timestamp_col, axis=1, inplace=True)
 
     df.sort_index(inplace=True)
+
     return df
 
 
-def print_duplicate_index(df):
+def check_duplicate_index(df):
     """
     Checks for duplicates in the index of a dataframe
     """
     dupes = df[df.index.duplicated()]
     num = dupes.shape[0]
-    print('{} duplicates'.format(num))
+
+    if num == 0:
+        print('no duplicates found')
+
     if num != 0:
+        print('{} duplicates'.format(num))
         print('duplicates are:')
         print(dupes.head())
-    return num
+        return dupes
 
 
 def check_duplicate_rows(df):
     duplicated_bools = df.duplicated()
     num = np.sum(duplicated_bools)
+
+    if num == 0:
+        print('no duplicate rows found')
+
     if num != 0:
         print('{} duplicate values'.format(num))
         print('duplicate values are {}'.format(df[duplicated_bools]))
-    return num
+        return df[duplicated_bools]
 
-
-def print_nans(df):
+def check_nans(df):
     """
     Checks for NANs in a dataframe
     """
     nans = df[df.isnull().any(axis=1)]
     num = nans.shape[0]
+
     print('{} nans'.format(num))
     if num != 0:
         print('nan values are:')
         print(nans.head())
-    return num
+
+        return nans
 
 
-def compare_index_length(df, freq):
+def check_index_length(df, freq):
     """
     Compare a DatetimeIndex with the expected length
     """
     ideal = pd.DatetimeIndex(start=df.index[0],
                              end=df.index[-1],
                              freq=freq)
+
     print('ideal index len {}'.format(ideal.shape[0]))
     print('actual index len {}'.format(df.shape[0]))
-    
-    print('missing are:')
-    print(set(df.index).symmetric_difference(set(ideal)))
+
+    if ideal.shape[0] != df.shape[0]:
+        print('missing are:')
+        missing = set(df.index).symmetric_difference(set(ideal))
+        print(missing)
+        return missing

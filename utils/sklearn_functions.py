@@ -2,7 +2,8 @@ from collections import defaultdict
 
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import TimeSeriesSplit 
+
 
 def cross_validation(model,
 		     params,
@@ -28,9 +29,12 @@ def cross_validation(model,
     """
     results = defaultdict(list)
 
-    for fold in range(1, n_folds + 1):
+    print('running {} folds cross_validation over {}'.format(n_folds, params))
+    ts_split = TimeSeriesSplit(n_splits=n_folds)
 
-        cv_train, cv_test = train_test_split(train_data, test_size=0.3, shuffle=True)
+    for fold, (train_index, test_index) in enumerate(ts_split.split(train_data), 1):
+        cv_train = train_data.iloc[train_index, :]
+        cv_test = train_data.iloc[test_index, :]
 
         #  create a fresh feature generator and target generator for each fold of CV
         feature_generator = make_feature_pipeline(**pipeline_params)
@@ -50,6 +54,8 @@ def cross_validation(model,
         results['train_scores'].append(train_score)
         results['test_scores'].append(test_score)
         results['models'].append(cv_model)
+        results['feature_pipe'].append(feature_generator)
+        results['target_pipe'].append(target_generator)
 
         if verbose:
             score_log = 'fold {:.0f} {:.1f} % train score {:.1f} % test score'.format(fold,
