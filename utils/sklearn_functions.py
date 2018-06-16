@@ -70,6 +70,8 @@ def cross_validation(
     results['test_score'] = np.mean(results['train_scores'])
     results['train_score'] = np.mean(results['test_scores'])
 
+    print('CV done - train {} % test {} %'.format(results['train_score'], results['test_score']))
+
     return results
 
 

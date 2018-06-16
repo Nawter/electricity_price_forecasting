@@ -48,7 +48,8 @@ def check_duplicate_rows(df):
         print('duplicate values are {}'.format(df[duplicated_bools]))
         return df[duplicated_bools]
 
-def check_nans(df):
+
+def check_nans(df, verbose=True):
     """
     Checks for NANs in a dataframe
     """
@@ -57,13 +58,14 @@ def check_nans(df):
 
     print('{} nans'.format(num))
     if num != 0:
-        print('nan values are:')
-        print(nans.head())
+        if verbose:
+            print('nan values are:')
+            print(nans.head())
 
         return nans
 
 
-def check_index_length(df, freq):
+def check_index_length(df, freq, verbose=True):
     """
     Compare a DatetimeIndex with the expected length
     """
@@ -75,7 +77,8 @@ def check_index_length(df, freq):
     print('actual index len {}'.format(df.shape[0]))
 
     if ideal.shape[0] != df.shape[0]:
-        print('missing are:')
         missing = set(df.index).symmetric_difference(set(ideal))
-        print(missing)
+        if verbose:
+            print('missing are:')
+            print(missing)
         return missing
